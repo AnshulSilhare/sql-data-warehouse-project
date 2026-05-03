@@ -123,7 +123,7 @@ CSV Files (ERP + CRM)
         ▼
   [BULK INSERT] ──────────► Bronze Tables  (raw_crm_*, raw_erp_*)
                                   │
-                          [CLEANSE + JOIN]
+                              [CLEANSE]
                                   │
                                   ▼
                           Silver Tables  (crm_*, erp_*)
