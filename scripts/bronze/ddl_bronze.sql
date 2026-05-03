@@ -2,15 +2,16 @@
 ======================================================
 DDL Script: Create tables in the bronze layer
 ======================================================
-This script creates the necessary tables in the bronze layer to stage the raw data from the source systems. The tables are designed to hold the data as it is ingested, without any transformations or cleansing applied. The structure of the tables is based on the source data files, and they will serve as the landing zone for the raw data before it is processed and moved to the silver layer.
+This script creates the necessary tables in the bronze layer to stage the raw data from the source systems.
+The tables are designed to hold the data as it is ingested, without any transformations or cleansing applied.
+The structure of the tables is based on the source data files, and they will serve as the landing zone for the raw data before it is processed and moved to the silver layer.
 Run this script to re-define the DDL structure of bronze Tables.
 ======================================================
 */
 
-
-If object_ID ('bronze.crm_cust_info', 'U') IS not null
-    drop table bronze.crm_cust_info
-create table bronze.crm_cust_info (
+IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT null
+    DROP TABLE bronze.crm_cust_info
+CREATE TABLE bronze.crm_cust_info (
     cst_id INT,
     cst_key NVARCHAR(50),
     cst_firstname NVARCHAR(50),
@@ -20,21 +21,21 @@ create table bronze.crm_cust_info (
     cst_create_date DATE
 )
 
-If object_ID ('bronze.crm_prd_info', 'U') IS not null
-    drop table bronze.crm_prd_info
-create table bronze.crm_prd_info (
-prd_id INT,
-prd_key NVARCHAR(50),
-prd_nm NVARCHAR(50),
-prd_cost INT,
-prd_line NVARCHAR(50),
-prd_start_dt DATETIME,
-prd_end_dt DATETIME
+IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT null
+    DROP TABLE bronze.crm_prd_info
+CREATE TABLE bronze.crm_prd_info (
+    prd_id INT,
+    prd_key NVARCHAR(50),
+    prd_nm NVARCHAR(50),
+    prd_cost INT,
+    prd_line NVARCHAR(50),
+    prd_start_dt DATETIME,
+    prd_end_dt DATETIME
 )
 
-If object_ID ('bronze.crm_sales_details', 'U') IS not null
-    drop table bronze.crm_sales_details
-create table bronze.crm_sales_details (
+IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT null
+    DROP TABLE bronze.crm_sales_details
+CREATE TABLE bronze.crm_sales_details (
     sls_ord_num NVARCHAR(50),
     sls_prd_key NVARCHAR(50),
     sls_cust_id INT,
@@ -46,26 +47,26 @@ create table bronze.crm_sales_details (
     sls_price INT
 )
 
-If object_ID ('bronze.erp_cust_az12', 'U') IS not null
-    drop table bronze.erp_cust_az12
-create table bronze.erp_cust_az12 (
-CID NVARCHAR(50),
-BDATE Date,
-GEN NVARCHAR(50)
+IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS NOT null
+    DROP TABLE bronze.erp_cust_az12
+CREATE TABLE bronze.erp_cust_az12 (
+    cid NVARCHAR(50),
+    bdate DATE,
+    gen NVARCHAR(50)
 )
 
-If object_ID ('bronze.erp_loc_a101', 'U') IS not null
-    drop table bronze.erp_loc_a101
-create table bronze.erp_loc_a101 (
-CID NVARCHAR(50),
-CNTRY NVARCHAR(50)
+IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS NOT null
+    DROP TABLE bronze.erp_loc_a101
+CREATE TABLE bronze.erp_loc_a101 (
+    cid NVARCHAR(50),
+    cntry NVARCHAR(50)
 )
 
-If object_ID ('bronze.erp_px_cat_g1v2', 'U') IS not null
-    drop table bronze.erp_px_cat_g1v2
-create table bronze.erp_px_cat_g1v2 (
-ID NVARCHAR(50),
-CAT NVARCHAR(50),
-SUBCAT NVARCHAR(50),
-MAINTENANCE NVARCHAR(50)
+IF OBJECT_ID('bronze.erp_px_cat_g1v2', 'U') IS NOT null
+    DROP TABLE bronze.erp_px_cat_g1v2
+CREATE TABLE bronze.erp_px_cat_g1v2 (
+    id NVARCHAR(50),
+    cat NVARCHAR(50),
+    subcat NVARCHAR(50),
+    maintenance NVARCHAR(50)
 )
