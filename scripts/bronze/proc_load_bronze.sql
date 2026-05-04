@@ -1,27 +1,34 @@
-USE sql_DataWarehouse
-GO
-
 /*
 =======================================================
 Stored Procedure: bronze.load_bronze
 =======================================================
-Description: This stored procedure is responsible for loading data from the source CSV files into the bronze layer tables.
+Script Purpose:
+    - This stored procedure is responsible for loading data from the source CSV files into the bronze layer tables.
+    - It uses the BULK INSERT command to efficiently load large volumes of data.
+    - The procedure also includes error handling to capture and log any issues that occur during the loading process.
+    - The duration of each load operation is measured and printed to the console for monitoring purposes.
+    - The procedure is designed to be executed after the DDL structure of the bronze tables has been defined using the ddl_bronze.sql script.
 
-- It uses the BULK INSERT command to efficiently load large volumes of data. - - The procedure also includes error handling to capture and log any issues that occur during the loading process.
+Actions Performed:
+    1. Truncate the existing data in the bronze layer tables to ensure a fresh load.
+    2. Insert data from the source CSV files into the bronze layer tables using BULK INSERT.
+    3. Handle any errors that occur during the loading process and log them for troubleshooting.
 
-- The duration of each load operation is measured and printed to the console for monitoring purposes.
-
-- The procedure is designed to be executed after the DDL structure of the bronze tables has been defined using the ddl_bronze.sql script.
-=======================================================
-
--- To execute the stored procedure and load the data into the bronze layer, run the following command:
-                EXEC bronze.load_bronze
-                Go
+Parameters:
+    None - This procedure does not require any input parameters.
+---------------------------------------------------
+To execute the stored procedure and load the data into the bronze layer, run the following command:
+    EXEC bronze.load_bronze
+    Go
 */
+
+USE sql_DataWarehouse
+GO
 
 -- Create or Alter Stored Procedure to load data into bronze layer
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS
 BEGIN
+
     DECLARE @startTime datetime, @endTime datetime, @batch_start_time datetime, @batch_end_time datetime
 
     SET @batch_start_time = GETDATE()
@@ -147,5 +154,3 @@ BEGIN
     PRINT ('Total Load Duration:' + CAST(DATEDIFF(SECOND, @batch_start_time, @batch_end_time) AS nvarchar(4000)) + ' seconds')
     PRINT ('=======================================================')
 END
-
-SELECT TOP 7 * FROM bronze.crm_cust_info
