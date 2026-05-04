@@ -1,18 +1,24 @@
 /*
 =======================================================
-Stored Procedure: silver.load_bronze
+Stored Procedure: silver.load_silver
 =======================================================
-Description: This stored procedure is responsible for loading the cleansed and transformed data from the bronze layer tables into the silver layer tables.
+Script Purpose:
+    - This stored procedure perfrom Extract, Transform, load process for loading the cleansed and transformed data from the bronze layer tables into the silver layer tables.
+    - The duration of each load operation is measured and printed to the console for monitoring purposes.
+    - The procedure is designed to be executed after the DDL structure of the silver tables has been defined using the ddl_silver.sql script.
 
-- The duration of each load operation is measured and printed to the console for monitoring purposes.
+Actions Performed:
+    1. Truncate the existing data in the silver layer tables to ensure a fresh load.
+    2. Insert transformed data into the silver layer tables from the bronze layer tables.
+    3. Handle any errors that occur during the loading process and log them for troubleshooting.
 
-- The procedure is designed to be executed after the DDL structure of the silver tables has been defined using the ddl_silver.sql script.
+Parameters:
+    None - This procedure does not require any input parameters.
+--------------------------------------------------
 
-=======================================================
-
--- To execute the stored procedure and load the data into the silver layer, run the following command:
-                EXEC silver.load_silver
-                Go
+To execute the stored procedure and load the data into the silver layer, run the following command:
+    EXEC silver.load_silver
+    Go
 */
 
 USE sql_DataWarehouse
