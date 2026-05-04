@@ -1,3 +1,23 @@
+/*
+=======================================================
+Stored Procedure: silver.load_bronze
+=======================================================
+Description: This stored procedure is responsible for loading the cleansed and transformed data from the bronze layer tables into the silver layer tables.
+
+- The duration of each load operation is measured and printed to the console for monitoring purposes.
+
+- The procedure is designed to be executed after the DDL structure of the silver tables has been defined using the ddl_silver.sql script.
+
+=======================================================
+
+-- To execute the stored procedure and load the data into the silver layer, run the following command:
+                EXEC silver.load_silver
+                Go
+*/
+
+USE sql_DataWarehouse
+GO
+
 EXEC silver.load_silver
 GO
 
@@ -10,7 +30,7 @@ BEGIN
     SET @batch_start_time = GETDATE()
     BEGIN TRY
         PRINT ('=======================================================')
-        PRINT ('Loading data into Bronze layer...')
+        PRINT ('Loading data into Silver layer...')
         PRINT ('=======================================================')
 
         PRINT ('-------------------------------------------------------')
@@ -30,12 +50,11 @@ BEGIN
             cst_gndr,
             cst_create_date
         )
-
         SELECT
             cst_id,
             cst_key,
-            TRIM(cst_firstname) AS cst_firstname,                                 -- To remove unwanted whitespaces
-            TRIM(cst_lastname) AS cst_lastname,                                   -- To remove unwanted whitespaces
+            TRIM(cst_firstname) AS cst_firstname,                              -- To remove unwanted whitespaces
+            TRIM(cst_lastname) AS cst_lastname,                                -- To remove unwanted whitespaces
             CASE
             -- Standardizing Marital Status to 'Married' and 'Single'
                 WHEN UPPER(TRIM(cst_marital_status)) = 'M' THEN 'Married'
@@ -44,7 +63,7 @@ BEGIN
                 ELSE 'n/a'
             END AS cst_marital_status,
             CASE
-                WHEN UPPER(TRIM(cst_gndr)) = 'M' THEN 'Male'                     -- Standardizing Gender to 'Male' and 'Female'
+                WHEN UPPER(TRIM(cst_gndr)) = 'M' THEN 'Male'                    -- Standardizing Gender to 'Male' and 'Female'
                 WHEN UPPER(TRIM(cst_gndr)) = 'F' THEN 'Female'
                 -- Handling missing values by filling them as 'n/a'
                 ELSE 'n/a'
@@ -60,7 +79,15 @@ BEGIN
         -- To handle nulls in primary key by excluding those records
         ) AS t
         WHERE flag_last = 1 AND cst_id IS NOT null
+        -- using subquery to filter out the latest record for each cst_id and also to exclude records with null cst_id
 
+        SET @endTime = GETDATE()
+        PRINT ('>> Load Duration:' + CAST(DATEDIFF(SECOND, @startTime, @endTime) AS nvarchar(4000)) + ' seconds')
+        PRINT ('----------------------------------------------------')
+
+        -- 2. silver.crm_prd_info
+
+        SET @startTime = GETDATE()
         TRUNCATE TABLE silver.crm_prd_info
 
         INSERT INTO silver.crm_prd_info (
@@ -76,9 +103,12 @@ BEGIN
         SELECT
             prd_id,
             REPLACE(SUBSTRING(prd_key, 1, 5), '-', '_') AS cat_id,
+            -- To handle and extract cat_id and prd_key from the original
             SUBSTRING(prd_key, 7, LEN(prd_key)) AS prd_key,
             prd_nm,
+            -- To handle negative and null values in prd_cost by replacing them with 0
             ISNULL(prd_cost, 0) AS prd_cost,
+            -- Standardizing Product Line values and handling missing values by filling them as 'n/a'
             CASE UPPER(TRIM(prd_line))
                 WHEN 'M' THEN 'Mountain'
                 WHEN 'R' THEN 'Road'
@@ -86,14 +116,20 @@ BEGIN
                 WHEN 'T' THEN 'Touring'
                 ELSE 'n/a'
             END AS prd_line,
+            -- Casting date columns to date format
             CAST(prd_start_dt AS date) AS prd_start_dt,
             CAST(
                 LEAD(prd_start_dt) OVER (PARTITION BY prd_key ORDER BY prd_start_dt) - 1 AS date
             ) AS prd_end_dt
         FROM bronze.crm_prd_info
 
+        SET @endTime = GETDATE()
+        PRINT ('>> Load Duration:' + CAST(DATEDIFF(SECOND, @startTime, @endTime) AS nvarchar(4000)) + ' seconds')
+        PRINT ('----------------------------------------------------')
+
         -- 3. silver.crm_sales_details
 
+        SET @startTime = GETDATE()
         TRUNCATE TABLE silver.crm_sales_details
 
         INSERT INTO silver.crm_sales_details (
@@ -106,7 +142,6 @@ BEGIN
             sls_ship_dt,
             sls_due_dt,
             sls_order_dt
-
         )
         SELECT
             sls_ord_num,    -- checked out for unwanted spaces and not found any
@@ -131,8 +166,13 @@ BEGIN
             END AS sls_order_dt
         FROM bronze.crm_sales_details
 
+        SET @endTime = GETDATE()
+        PRINT ('>> Load Duration:' + CAST(DATEDIFF(SECOND, @startTime, @endTime) AS nvarchar(4000)) + ' seconds')
+        PRINT ('----------------------------------------------------')
+
         -- 4. erp_cust_az12
 
+        SET @startTime = GETDATE()
         TRUNCATE TABLE silver.erp_cust_az12
 
         INSERT INTO silver.erp_cust_az12 (
@@ -140,7 +180,6 @@ BEGIN
             bdate,
             gen
         )
-
         SELECT
             SUBSTRING(cid, 4, LEN(cid)) AS cid,
             CASE
@@ -154,16 +193,18 @@ BEGIN
             END AS gen
         FROM bronze.erp_cust_az12
 
-        SELECT * FROM silver.erp_cust_az12
+        SET @endTime = GETDATE()
+        PRINT ('>> Load Duration:' + CAST(DATEDIFF(SECOND, @startTime, @endTime) AS nvarchar(4000)) + ' seconds')
+        PRINT ('----------------------------------------------------')
 
         -- 5. erp_loc_a101
 
+        SET @startTime = GETDATE()
         TRUNCATE TABLE silver.erp_loc_a101
         INSERT INTO silver.erp_loc_a101 (
             cid,
             cntry
         )
-
         SELECT
             REPLACE(cid, '-', '') AS cid,
             CASE
@@ -175,10 +216,13 @@ BEGIN
             END AS cntry
         FROM bronze.erp_loc_a101
 
-        SELECT DISTINCT cntry FROM silver.erp_loc_a101
+        SET @endTime = GETDATE()
+        PRINT ('>> Load Duration:' + CAST(DATEDIFF(SECOND, @startTime, @endTime) AS nvarchar(4000)) + ' seconds')
+        PRINT ('----------------------------------------------------')
 
         -- 6. erp_px_cat_g1v2
 
+        SET @startTime = GETDATE()
         TRUNCATE TABLE silver.erp_px_cat_g1v2
 
         INSERT INTO silver.erp_px_cat_g1v2 (
@@ -193,6 +237,11 @@ BEGIN
             subcat,
             maintenance
         FROM bronze.erp_px_cat_g1v2
+
+        SET @endTime = GETDATE()
+        PRINT ('>> Load Duration:' + CAST(DATEDIFF(SECOND, @startTime, @endTime) AS nvarchar(4000)) + ' seconds')
+        PRINT ('----------------------------------------------------')
+
     END TRY
     BEGIN CATCH
         PRINT ('Error occurred while loading data into Silver layer: ')
