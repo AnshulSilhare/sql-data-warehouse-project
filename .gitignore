@@ -1,0 +1,26 @@
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore local configuration files (CRITICAL FOR SECURITY)
+*.env
+
+# Ignore SQL Server-related files
+*.mdf
+*.ldf
+*.ndf
+*.bak
+*.trn
+*.log
+*.tmp
+
+# Ignore IDE & Linter-specific files
+.vscode/
+.idea/
+.sqlfluff-cache/      # <--- Added to keep your linter fast
+
+# Ignore exported data, diagrams, and raw datasets
+*.csv
+*.png
+*.pdf
+datasets/             # <--- Added to prevent massive 30,000+ row uploads
