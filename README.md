@@ -160,7 +160,7 @@ Dimensional model built as a **Star Schema**:
 | Table Type | Tables |
 |-----------|--------|
 | **Fact** | `fact_sales` |
-| **Dimensions** | `dim_customer`, `dim_product`, `dim_date` |
+| **Dimensions** | `dim_customer`, `dim_product` |
 
 Optimized for aggregation-heavy analytical queries.
 
