@@ -1,6 +1,6 @@
 # 🏷️ Naming Conventions
 
-> **Overview**
+> **Overview** 
 > Establishing strict, universal naming conventions ensures that the data warehouse remains intuitive, predictable, and manageable as it scales. This document outlines the standard taxonomy for schemas, tables, views, columns, and programmatic objects across all data layers.
 
 ---
